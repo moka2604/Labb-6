@@ -11,9 +11,9 @@ const errorMessage = document.querySelector("#error");
 
 
 /**
-*Validerar formulärets inmatning
-*/
-searchForm.addEventListener("submit", (event) => {
+ *Validerar formulärets inmatning
+ */
+searchForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const searchPhrase = searchInput.value.trim();
@@ -27,5 +27,12 @@ searchForm.addEventListener("submit", (event) => {
   errorMessage.textContent = "";
   searchInput.setAttribute("aria-invalid", "false");
 
-  console.log("Sökfras:", searchPhrase);
+
+ /**
+  *Hämtar recept från API:et
+  */
+  const response = await fetch("https://dummyjson.com/recipes");
+  const result = await response.json();
+
+  console.log(result);
 });
