@@ -34,5 +34,5 @@ searchForm.addEventListener("submit", async (event) => {
   const response = await fetch("https://dummyjson.com/recipes");
   const result = await response.json();
 
-  console.log(result);
+  console.log(result.recipes[0]);
 });
