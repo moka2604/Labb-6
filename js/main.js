@@ -28,20 +28,43 @@ function displayRecipe(recipe) {
 
   const info = document.createElement("div");
   info.className = "recipe-info";
-
   [
     `Portioner: ${recipe.servings}`,
     `Förberedelsetid: ${recipe.prepTimeMinutes} minuter`,
     `Tillagningstid: ${recipe.cookTimeMinutes} minuter`,
     `Svårighetsgard: ${recipe.difficulty}`
-    ].forEach((text) => {
+  ].forEach((text) => {
       const paragraph = document.createElement("p");
       paragraph.textContent = text;
       info.append(paragraph);
-    });
+  });
+  article.append(info)
+
+  const ingredientsTitle = document.createElement("h4");
+  ingredientsTitle.textContent = "Ingredienser";
+  article.append(ingredientsTitle);
+
+  const ingredientsList = document.createElement("ul");
+  recipe.ingredients.forEach((ingredients) => {
+    const item = document.createElement("li");
+    item.textContent = ingredient;
+    ingredientsList.append(item);
+  });
+  article.append(ingredientsList);
+
+  const instructionsTitle = document.createElement("h4");
+  instructionsTitle.textContent = "Ingredienser";
+  article.append(instructionsTitle);
+
+  const instructionsList = document.createElement("ol");
+  recipe.instructions.forEach((instruction) => {
+    const item = document.createElement("li");
+    item.textContent = instruction;
+    instructionsList.append(item);
+  });
+  article.append(instructionsList);
   
-    article.append(info)
-    recipeContainer.replaceChildren(article);
+  recipeContainer.replaceChildren(article);
 }
 
 
