@@ -8,8 +8,10 @@
 const searchForm = document.querySelector("#searchform");
 const searchInput = document.querySelector("#search");
 const errorMessage = document.querySelector("#error");
+const apiMessage = document.querySelector("#message");
 const recipeContainer = document.querySelector("#recipe");
 
+let latestSearchId = 0;
 
 /**
  * Skapar och visar ett recept i receptsektionen
@@ -45,7 +47,7 @@ function displayRecipe(recipe) {
   article.append(ingredientsTitle);
 
   const ingredientsList = document.createElement("ul");
-  recipe.ingredients.forEach((ingredients) => {
+  recipe.ingredients.forEach((ingredient) => {
     const item = document.createElement("li");
     item.textContent = ingredient;
     ingredientsList.append(item);
@@ -53,7 +55,7 @@ function displayRecipe(recipe) {
   article.append(ingredientsList);
 
   const instructionsTitle = document.createElement("h4");
-  instructionsTitle.textContent = "Ingredienser";
+  instructionsTitle.textContent = "Instruktioner";
   article.append(instructionsTitle);
 
   const instructionsList = document.createElement("ol");
@@ -73,11 +75,16 @@ function displayRecipe(recipe) {
  */
 searchForm.addEventListener("submit", async (event) => {
   event.preventDefault();
+  const searchId = ++latestSearchId();
+
+  recipeContainer.replaceChildren();
 
   const searchPhrase = searchInput.value.trim();
   if (searchPhrase.length === 0) {
     errorMessage.textContent = "Du måste fylla i en sökfras!";
     searchInput.setAttribute("aria-invalid", "true");
+    apiMessage.textContent = "";
+    recipeContainer.setAttribute("aria-busy", "false");
     searchInput.focus();
     return;
   }
@@ -85,25 +92,57 @@ searchForm.addEventListener("submit", async (event) => {
   errorMessage.textContent = "";
   searchInput.setAttribute("aria-invalid", "false");
 
+  recipeContainer.setAttribute("aria-busy", "true");
+  apiMessage.textContent = "Söker efter recept...";
+
 
  /**
   * Hämtar recept från API:et
   */
-  const response = await fetch("https://dummyjson.com/recipes");
-  const result = await response.json();
+ try {
+      const response = await fetch("https://dummyjson.com/recipes");
 
-  const normalizedSearchPhrase = searchPhrase.toLowerCase();
-  const matchingRecipes = result.recipes.filter((recipe) => {
-    const searchableText = [
-      recipe.name,
-      ...(Array.isArray(recipe.ingredients) ? recipe.ingredients : [])
-    ].join(" ").toLowerCase();
+      if (!response.ok) {
+        throw new Error(`API-anropet misslyckades (HTTP ${response.status}).`);
+      }
+    
+      const result = await response.json();
 
-      return searchableText.includes(normalizedSearchPhrase);
-  });
+      if (searchId !== latestSearchId) {
+        return;
+      }
 
-  if (matchingRecipes.length > 0) {
-    displayRecipe(matchingRecipes[0]);
-  }
-  
+      if (!Array.isArray(result.recipes)) {
+        throw new Error("API-svaret innehåller ingen giltig lista med recept.");
+      }
+
+      const normalizedSearchPhrase = searchPhrase.toLowerCase();
+      const matchingRecipes = result.recipes.filter((recipe) => {
+        const searchableText = [
+          recipe.name,
+          ...(Array.isArray(recipe.ingredients) ? recipe.ingredients : [])
+        ].join(" ").toLowerCase();
+
+        return searchableText.includes(normalizedSearchPhrase);
+      });
+
+      if (matchingRecipes.length === 0) {
+        apiMessage.textContent = `Inga recept hittades för "${searchPhrase}". Prova en annan sökfras.`;
+        return;
+      }
+
+      displayRecipe(matchingRecipes[0]);
+      apiMessage.textContent = "";
+ } catch (error) {
+    if (searchId !== latestSearchId) {
+      return;
+    }
+
+    apiMessage.textContent = "Det gick inte att hämta recept. Kontrollera anslutningen och försök igen.";
+    console.error("Fel vid API-anrop:", error);
+ } finally {
+    if (searchId === latestSearchId) {
+      recipeContainer.setAttribute("aria-busy", "false");
+    }
+ }
 });
