@@ -34,7 +34,7 @@ function displayRecipe(recipe) {
     `Portioner: ${recipe.servings}`,
     `Förberedelsetid: ${recipe.prepTimeMinutes} minuter`,
     `Tillagningstid: ${recipe.cookTimeMinutes} minuter`,
-    `Svårighetsgard: ${recipe.difficulty}`
+    `Svårighetsgrad: ${recipe.difficulty}`
   ].forEach((text) => {
       const paragraph = document.createElement("p");
       paragraph.textContent = text;
@@ -75,7 +75,7 @@ function displayRecipe(recipe) {
  */
 searchForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const searchId = ++latestSearchId();
+  const searchId = ++latestSearchId;
 
   recipeContainer.replaceChildren();
 
